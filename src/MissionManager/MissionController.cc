@@ -2341,7 +2341,7 @@ bool MissionController::showPlanFromManagerVehicle (void)
             // Fake a _newMissionItemsAvailable with the current items
             qCDebug(MissionControllerLog) << "showPlanFromManagerVehicle: sync complete simulate signal";
             _itemsRequested = true;
-            _newMissionItemsAvailableFromVehicle(false /* removeAllRequested */);
+            _newMissionItemsAvailableFromVehicle(false /* removeAllRequested */, false /* skipViewportFit */);
             return false;
         }
     }
