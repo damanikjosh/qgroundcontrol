@@ -32,9 +32,7 @@ Item {
     property var    _rallyPointController:      planMasterController.rallyPointController
     property var    _guidedController:          globals.guidedControllerFlyView
     property var    _missionLineViewComponent
-    property bool   _isInMissionMode:           vehicle.flightMode === vehicle.missionFlightMode
-
-    property string fmode: vehicle.flightMode
+    property bool   _isInMissionMode:           vehicle && vehicle.flightMode === vehicle.missionFlightMode
 
     // Add the mission item visuals to the map
     // Only show mission items when vehicle is in Mission mode
