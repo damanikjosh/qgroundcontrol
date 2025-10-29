@@ -228,10 +228,13 @@ FlightMap {
         target:                 _missionController
         ignoreUnknownSignals:   true
         function onNewItemsFromVehicle() {
-            var visualItems = _missionController.visualItems
-            if (visualItems && visualItems.count !== 1) {
-                mapFitFunctions.fitMapViewportToMissionItems()
-                firstVehiclePositionReceived = true
+            // Only fit viewport if the load was user-initiated (not automatic periodic download)
+            if (_missionController.fitViewportToItemsOnLoad) {
+                var visualItems = _missionController.visualItems
+                if (visualItems && visualItems.count !== 1) {
+                    mapFitFunctions.fitMapViewportToMissionItems()
+                    firstVehiclePositionReceived = true
+                }
             }
         }
     }
