@@ -74,11 +74,12 @@ bool RallyPointManager::supported(void) const
     return (_vehicle->capabilityBits() & MAV_PROTOCOL_CAPABILITY_MISSION_RALLY) && (_vehicle->maxProtoVersion() >= 200);
 }
 
-void RallyPointManager::_planManagerLoadComplete(bool removeAllRequested)
+void RallyPointManager::_planManagerLoadComplete(bool removeAllRequested, bool skipViewportFit)
 {
     _rgPoints.clear();
 
     Q_UNUSED(removeAllRequested);
+    Q_UNUSED(skipViewportFit);
 
     const QList<MissionItem*>& rallyItems = missionItems();
 

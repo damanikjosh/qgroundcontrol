@@ -42,6 +42,11 @@ public:
     /// Load the mission items from the vehicle
     ///     Signals newMissionItemsAvailable when done
     void loadFromVehicle(void);
+    
+    /// Load the mission items from the vehicle
+    ///     @param skipViewportFit: if true, skip automatic viewport fitting in UI
+    ///     Signals newMissionItemsAvailable when done
+    void loadFromVehicle(bool skipViewportFit);
 
     /// Writes the specified set of mission items to the vehicle
     /// IMPORTANT NOTE: PlanManager will take control of the MissionItem objects with the missionItems list. It will free them when done.
@@ -74,7 +79,7 @@ public:
     static const int _maxRetryCount = 5;
 
 signals:
-    void newMissionItemsAvailable   (bool removeAllRequested);
+    void newMissionItemsAvailable   (bool removeAllRequested, bool skipViewportFit);
     void inProgressChanged          (bool inProgress);
     void error                      (int errorCode, const QString& errorMsg);
     void currentIndexChanged        (int currentIndex);
@@ -149,6 +154,7 @@ protected:
     QList<MissionItem*> _writeMissionItems;     ///< Set of mission items currently being written to vehicle
     int                 _currentMissionIndex;
     int                 _lastCurrentIndex;
+    bool                _skipViewportFit;       ///< Whether to skip viewport fitting for this load
 
 private:
     void _setTransactionInProgress(TransactionType_t type);

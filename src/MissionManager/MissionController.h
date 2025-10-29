@@ -122,6 +122,7 @@ public:
 
     Q_PROPERTY(QGroundControlQmlGlobal::AltMode globalAltitudeMode         READ globalAltitudeMode         WRITE setGlobalAltitudeMode NOTIFY globalAltitudeModeChanged)
     Q_PROPERTY(QGroundControlQmlGlobal::AltMode globalAltitudeModeDefault  READ globalAltitudeModeDefault  NOTIFY globalAltitudeModeChanged)                               ///< Default to use for newly created items
+    Q_PROPERTY(bool                 fitViewportToItemsOnLoad        MEMBER _fitViewportToItemsOnLoad                                NOTIFY fitViewportToItemsOnLoadChanged) ///< Whether to fit viewport when loading items from vehicle
 
     Q_INVOKABLE void removeVisualItem(int viIndex);
 
@@ -313,9 +314,10 @@ signals:
     void _recalcMissionFlightStatusSignal   (void);
     void _recalcFlightPathSegmentsSignal    (void);
     void globalAltitudeModeChanged          (void);
+    void fitViewportToItemsOnLoadChanged    (bool fitViewportToItemsOnLoad);
 
 private slots:
-    void _newMissionItemsAvailableFromVehicle   (bool removeAllRequested);
+    void _newMissionItemsAvailableFromVehicle   (bool removeAllRequested, bool skipViewportFit);
     void _itemCommandChanged                    (void);
     void _inProgressChanged                     (bool inProgress);
     void _currentMissionIndexChanged            (int sequenceNumber);
@@ -389,6 +391,7 @@ private:
     FlightPathSegmentHashTable  _flightPathSegmentHashTable;
     bool                        _firstItemsFromVehicle =        false;
     bool                        _itemsRequested =               false;
+    bool                        _fitViewportToItemsOnLoad =     true;   ///< Whether to fit viewport when loading items from vehicle (false for automatic periodic downloads)
     bool                        _inRecalcSequence =             false;
     MissionFlightStatus_t       _missionFlightStatus;
     AppSettings*                _appSettings =                  nullptr;

@@ -52,7 +52,7 @@ signals:
 
 private slots:
     void _sendComplete              (bool error);
-    void _planManagerLoadComplete   (bool removeAllRequested);
+    void _planManagerLoadComplete   (bool removeAllRequested, bool skipViewportFit);
 
 protected:
     void _sendError(ErrorCode_t errorCode, const QString& errorMsg);

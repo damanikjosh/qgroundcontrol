@@ -136,9 +136,15 @@ void MissionController::_init(void)
 }
 
 // Called when new mission items have completed downloading from Vehicle
-void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllRequested)
+void MissionController::_newMissionItemsAvailableFromVehicle(bool removeAllRequested, bool skipViewportFit)
 {
-    qCDebug(MissionControllerLog) << "_newMissionItemsAvailableFromVehicle flyView:count" << _flyView << _missionManager->missionItems().count();
+    qCDebug(MissionControllerLog) << "_newMissionItemsAvailableFromVehicle flyView:count:skipViewportFit" << _flyView << _missionManager->missionItems().count() << skipViewportFit;
+
+    // Store the flag so QML can check it
+    if (_fitViewportToItemsOnLoad != !skipViewportFit) {
+        _fitViewportToItemsOnLoad = !skipViewportFit;
+        emit fitViewportToItemsOnLoadChanged(_fitViewportToItemsOnLoad);
+    }
 
     // Fly view always reloads on _loadComplete
     // Plan view only reloads if:
