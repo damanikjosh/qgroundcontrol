@@ -29,6 +29,7 @@ PlanManager::PlanManager(Vehicle* vehicle, MAV_MISSION_TYPE planType)
     , _missionItemCountToRead   (-1)
     , _currentMissionIndex      (-1)
     , _lastCurrentIndex         (-1)
+    , _skipViewportFit          (false)
 {
     _ackTimeoutTimer = new QTimer(this);
     _ackTimeoutTimer->setSingleShot(true);
@@ -130,17 +131,23 @@ void PlanManager::_writeMissionCount(void)
 
 void PlanManager::loadFromVehicle(void)
 {
+    loadFromVehicle(false /* skipViewportFit */);
+}
+
+void PlanManager::loadFromVehicle(bool skipViewportFit)
+{
     if (_vehicle->isOfflineEditingVehicle()) {
         return;
     }
 
-    qCDebug(PlanManagerLog) << QStringLiteral("loadFromVehicle %1 read sequence").arg(_planTypeString());
+    qCDebug(PlanManagerLog) << QStringLiteral("loadFromVehicle %1 read sequence skipViewportFit:%2").arg(_planTypeString()).arg(skipViewportFit);
 
     if (inProgress()) {
         qCDebug(PlanManagerLog) << QStringLiteral("loadFromVehicle %1 called while transaction in progress").arg(_planTypeString());
         return;
     }
 
+    _skipViewportFit = skipViewportFit;
     _retryCount = 0;
     _setTransactionInProgress(TransactionRead);
     _connectToMavlink();
@@ -824,7 +831,8 @@ void PlanManager::_finishTransaction(bool success, bool apmGuidedItemWrite)
             // Read from vehicle failed, clear partial list
             _clearAndDeleteMissionItems();
         }
-        emit newMissionItemsAvailable(false);
+        emit newMissionItemsAvailable(false, _skipViewportFit);
+        _skipViewportFit = false;  // Reset for next load
         break;
     case TransactionWrite:
         // No need to do anything for ArduPilot guided go to waypoint write

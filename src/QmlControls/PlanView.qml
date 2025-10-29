@@ -253,7 +253,8 @@ Item {
         target: _missionController
 
         function onNewItemsFromVehicle() {
-            if (_visualItems && _visualItems.count !== 1) {
+            // Only fit viewport if the load was user-initiated (not automatic periodic download)
+            if (_missionController.fitViewportToItemsOnLoad && _visualItems && _visualItems.count !== 1) {
                 mapFitFunctions.fitMapViewportToMissionItems()
             }
             _missionController.setCurrentPlanViewSeqNum(0, true)

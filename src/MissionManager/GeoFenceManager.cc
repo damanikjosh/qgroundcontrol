@@ -126,11 +126,12 @@ void GeoFenceManager::_sendComplete(bool error)
     emit sendComplete(error);
 }
 
-void GeoFenceManager::_planManagerLoadComplete(bool removeAllRequested)
+void GeoFenceManager::_planManagerLoadComplete(bool removeAllRequested, bool skipViewportFit)
 {
     bool loadFailed = false;
 
     Q_UNUSED(removeAllRequested);
+    Q_UNUSED(skipViewportFit);
 
     _polygons.clear();
     _circles.clear();

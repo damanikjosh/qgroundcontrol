@@ -97,3 +97,4 @@ cpm_modules
 
 .qtcreator/
 .claude/
+_codeql_detected_source_root
