@@ -23,11 +23,21 @@ MissionManager::MissionManager(Vehicle* vehicle)
     , _cachedLastCurrentIndex   (-1)
 {
     connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &MissionManager::_mavlinkMessageReceived);
+    connect(_vehicle, &Vehicle::flightModeChanged, this, &MissionManager::_onFlightModeChanged);
+    
+    // Setup periodic download timer - 3 seconds interval
+    _periodicDownloadTimer.setInterval(3000);
+    connect(&_periodicDownloadTimer, &QTimer::timeout, this, &MissionManager::_periodicMissionDownload);
+    
+    // Start timer if already in mission mode
+    if (_vehicle->flightMode() == _vehicle->missionFlightMode()) {
+        _periodicDownloadTimer.start();
+    }
 }
 
 MissionManager::~MissionManager()
 {
-
+    _periodicDownloadTimer.stop();
 }
 
 void MissionManager::writeArduPilotGuidedMissionItem(const QGeoCoordinate& gotoCoord, bool altChangeOnly)
@@ -288,6 +298,31 @@ void MissionManager::_handleHeartbeat(const mavlink_message_t& message)
         _lastCurrentIndex = _cachedLastCurrentIndex;
         _cachedLastCurrentIndex = -1;
         emit lastCurrentIndexChanged(_lastCurrentIndex);
+    }
+}
+
+void MissionManager::_periodicMissionDownload()
+{
+    // Only download if vehicle is in mission mode and not offline
+    if (_vehicle->isOfflineEditingVehicle()) {
+        return;
+    }
+    
+    if (_vehicle->flightMode() == _vehicle->missionFlightMode()) {
+        qCDebug(MissionManagerLog) << "Periodic mission download triggered in mission mode";
+        loadFromVehicle();
+    }
+}
+
+void MissionManager::_onFlightModeChanged(const QString& flightMode)
+{
+    // Start or stop the periodic download timer based on flight mode
+    if (flightMode == _vehicle->missionFlightMode()) {
+        qCDebug(MissionManagerLog) << "Entering mission mode - starting periodic mission download";
+        _periodicDownloadTimer.start();
+    } else {
+        qCDebug(MissionManagerLog) << "Leaving mission mode - stopping periodic mission download";
+        _periodicDownloadTimer.stop();
     }
 }
 

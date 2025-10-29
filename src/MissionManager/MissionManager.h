@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <QtCore/QTimer>
 #include <QtQmlIntegration/QtQmlIntegration>
 
 #include "PlanManager.h"
@@ -43,6 +44,8 @@ public:
 
 private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);
+    void _periodicMissionDownload();
+    void _onFlightModeChanged(const QString& flightMode);
 
 private:
     void _handleHighLatency(const mavlink_message_t& message);
@@ -51,5 +54,6 @@ private:
     void _updateMissionIndex(int index);
     void _handleHeartbeat(const mavlink_message_t& message);
 
-    int _cachedLastCurrentIndex;
+    int         _cachedLastCurrentIndex;
+    QTimer      _periodicDownloadTimer;
 };
