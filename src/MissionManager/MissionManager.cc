@@ -310,6 +310,7 @@ void MissionManager::_periodicMissionDownload()
     
     if (_vehicle->flightMode() == _vehicle->missionFlightMode()) {
         qCDebug(MissionManagerLog) << "Periodic mission download triggered in mission mode";
+        // loadFromVehicle() has internal checks for inProgress() and will return early if a transaction is already active
         loadFromVehicle();
     }
 }
