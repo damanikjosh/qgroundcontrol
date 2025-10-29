@@ -9,6 +9,7 @@
 
 #include "MissionManager.h"
 #include "Vehicle.h"
+#include "VehicleLinkManager.h"
 #include "FirmwarePlugin.h"
 #include "MAVLinkProtocol.h"
 #include "QGCApplication.h"
@@ -24,13 +25,14 @@ MissionManager::MissionManager(Vehicle* vehicle)
 {
     connect(_vehicle, &Vehicle::mavlinkMessageReceived, this, &MissionManager::_mavlinkMessageReceived);
     connect(_vehicle, &Vehicle::flightModeChanged, this, &MissionManager::_onFlightModeChanged);
+    connect(_vehicle->vehicleLinkManager(), &VehicleLinkManager::communicationLostChanged, this, &MissionManager::_onCommunicationLostChanged);
     
     // Setup periodic download timer - 3 seconds interval
     _periodicDownloadTimer.setInterval(3000);
     connect(&_periodicDownloadTimer, &QTimer::timeout, this, &MissionManager::_periodicMissionDownload);
     
-    // Start timer if already in mission mode
-    if (_vehicle->flightMode() == _vehicle->missionFlightMode()) {
+    // Start timer if already in mission mode and communication is active
+    if (_vehicle->flightMode() == _vehicle->missionFlightMode() && !_vehicle->vehicleLinkManager()->communicationLost()) {
         _periodicDownloadTimer.start();
     }
 }
@@ -303,8 +305,13 @@ void MissionManager::_handleHeartbeat(const mavlink_message_t& message)
 
 void MissionManager::_periodicMissionDownload()
 {
-    // Only download if vehicle is in mission mode and not offline
+    // Only download if vehicle is in mission mode, not offline, and communication is not lost
     if (_vehicle->isOfflineEditingVehicle()) {
+        return;
+    }
+    
+    if (_vehicle->vehicleLinkManager()->communicationLost()) {
+        qCDebug(MissionManagerLog) << "Periodic mission download skipped - communication lost";
         return;
     }
     
@@ -318,13 +325,28 @@ void MissionManager::_periodicMissionDownload()
 
 void MissionManager::_onFlightModeChanged(const QString& flightMode)
 {
-    // Start or stop the periodic download timer based on flight mode
-    if (flightMode == _vehicle->missionFlightMode()) {
+    // Start or stop the periodic download timer based on flight mode and communication status
+    if (flightMode == _vehicle->missionFlightMode() && !_vehicle->vehicleLinkManager()->communicationLost()) {
         qCDebug(MissionManagerLog) << "Entering mission mode - starting periodic mission download";
         _periodicDownloadTimer.start();
     } else {
         qCDebug(MissionManagerLog) << "Leaving mission mode - stopping periodic mission download";
         _periodicDownloadTimer.stop();
+    }
+}
+
+void MissionManager::_onCommunicationLostChanged(bool communicationLost)
+{
+    // Stop periodic download timer when communication is lost, restart when regained
+    if (communicationLost) {
+        qCDebug(MissionManagerLog) << "Communication lost - stopping periodic mission download";
+        _periodicDownloadTimer.stop();
+    } else {
+        // Only restart timer if we're in mission mode
+        if (_vehicle->flightMode() == _vehicle->missionFlightMode()) {
+            qCDebug(MissionManagerLog) << "Communication restored - starting periodic mission download";
+            _periodicDownloadTimer.start();
+        }
     }
 }
 

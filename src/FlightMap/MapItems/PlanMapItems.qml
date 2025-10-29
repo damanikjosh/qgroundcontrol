@@ -32,12 +32,12 @@ Item {
     property var    _rallyPointController:      planMasterController.rallyPointController
     property var    _guidedController:          globals.guidedControllerFlyView
     property var    _missionLineViewComponent
-
-    property string fmode: vehicle.flightMode
+    property bool   _isInMissionMode:           vehicle && vehicle.flightMode === vehicle.missionFlightMode
 
     // Add the mission item visuals to the map
+    // Only show mission items when vehicle is in Mission mode
     Repeater {
-        model: largeMapView ? _missionController.visualItems : 0
+        model: (largeMapView && _isInMissionMode) ? _missionController.visualItems : 0
 
         delegate: MissionItemMapVisual {
             map:        _map
@@ -66,11 +66,11 @@ Item {
 
         MapItemGroup {
             MissionLineView {
-                model: _missionController.simpleFlightPathSegments
+                model: _isInMissionMode ? _missionController.simpleFlightPathSegments : 0
             }
 
             MapItemView {
-                model: _missionController.directionArrows
+                model: _isInMissionMode ? _missionController.directionArrows : 0
 
                 delegate: MapLineArrow {
                     fromCoord:      object ? object.coordinate1 : undefined

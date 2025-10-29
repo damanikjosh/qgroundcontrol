@@ -46,6 +46,7 @@ private slots:
     void _mavlinkMessageReceived(const mavlink_message_t& message);
     void _periodicMissionDownload();
     void _onFlightModeChanged(const QString& flightMode);
+    void _onCommunicationLostChanged(bool communicationLost);
 
 private:
     void _handleHighLatency(const mavlink_message_t& message);
